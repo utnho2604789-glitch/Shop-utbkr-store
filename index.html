@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTBKR STORE - Khách Hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- HEADER -->
+    <header class="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 text-xl p-2"><i class="fa-solid fa-bars"></i></button>
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md">U</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">UTBKR STORE</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Hệ thống mua sắm tự động</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Nút bật tắt Sáng/Tối -->
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-yellow-400 transition" title="Đổi giao diện Sáng/Tối">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <div id="authArea">
+                    <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">Đăng nhập</button>
+                </div>
+                <div id="loggedInArea" class="hidden flex items-center space-x-2">
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-xl flex items-center space-x-2">
+                        <i class="fa-solid fa-wallet text-emerald-600"></i>
+                        <div>
+                            <p class="text-[10px] text-emerald-600 font-medium">Số dư</p>
+                            <p id="clientBalance" class="text-xs font-bold text-emerald-700 dark:text-emerald-400">0đ</p>
+                        </div>
+                        <button onclick="openTopUpModal()" class="ml-1 bg-emerald-600 text-white w-6 h-6 rounded-lg text-xs flex items-center justify-center"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MENU SIDEBAR GIỐNG ẢNH MẪU -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-50 hidden transition-opacity"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <h3 class="font-extrabold text-lg text-blue-600">UTBKR MENU</h3>
+            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-center">
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Số dư của tôi</p>
+            <p id="sidebarBalance" class="text-2xl font-black text-rose-500 mt-1">0</p>
+        </div>
+
+        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto text-sm font-medium">
+            <a href="#" onclick="toggleSidebar(); switchTab('home')" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-house text-blue-500 w-5"></i><span>Trang chủ</span></span>
+            </a>
+            <a href="#" onclick="toggleSidebar(); switchTab('home')" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-bag-shopping text-emerald-500 w-5"></i><span>Sản phẩm</span></span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </a>
+            <a href="#" onclick="toggleSidebar(); openTopUpModal()" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-landmark text-amber-500 w-5"></i><span>Nạp tiền</span></span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </a>
+            <a href="#" onclick="toggleSidebar(); openMyOrdersModal()" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-clock-rotate-left text-purple-500 w-5"></i><span>Lịch sử</span></span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </a>
+            <a href="#" onclick="toggleSidebar(); showInfoModal('Blogs', 'Nơi cập nhật thông báo và chia sẻ thủ thuật công nghệ mới nhất từ UTBKR STORE.')" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-newspaper text-rose-500 w-5"></i><span>Blogs</span></span>
+            </a>
+            <a href="#" onclick="toggleSidebar(); showInfoModal('Tài liệu API', 'Hệ thống hỗ trợ kết nối API nạp tự động và quản lý kho hàng cho lập trình viên.')" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <span class="flex items-center space-x-3"><i class="fa-solid fa-file-code text-cyan-500 w-5"></i><span>Tài liệu API</span></span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+            <button onclick="logout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 font-semibold hover:bg-rose-100 transition">
+                <i class="fa-solid fa-right-from-bracket w-5"></i><span>Đăng xuất</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-extrabold">Cửa Hàng Trực Tuyến</h2>
+                <p class="text-blue-100 text-sm">Mua sắm an toàn, tự động nhận tài khoản & tệp file ngay lập tức.</p>
+            </div>
+            <button onclick="openTopUpModal()" class="bg-white text-blue-700 font-bold px-5 py-2.5 rounded-xl shadow text-sm hover:bg-blue-50">Nạp tiền QR</button>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-boxes-stacked text-blue-600 mr-2"></i>Sản phẩm đang bán</h3>
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </main>
+
+    <!-- BONG BÓNG CHAT ZALO -->
+    <a href="https://zalo.me/0328870287" target="_blank" class="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 group" title="Chat Zalo Hỗ Trợ">
+        <i class="fa-solid fa-comment-dots"></i>
+        <span class="absolute right-16 bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-md font-medium">Hỗ trợ Zalo: 0328870287</span>
+    </a>
+
+    <!-- Modal Lịch sử đơn hàng -->
+    <div id="myOrdersModal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative max-h-[85vh] flex flex-col border border-slate-800">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="text-lg font-bold"><i class="fa-solid fa-bag-shopping text-blue-600 mr-2"></i>Lịch sử đơn hàng & Nội dung đã mua</h3>
+                <button onclick="closeMyOrdersModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="myOrdersList" class="overflow-y-auto space-y-3 flex-1 pr-1"></div>
+        </div>
+    </div>
+
+    <!-- Modal Đăng nhập / Đăng ký -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative border border-slate-800">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex border-b border-slate-200 dark:border-slate-800">
+                <button onclick="switchAuthTab('login')" id="tabLoginBtn" class="flex-1 pb-3 font-bold text-blue-600 border-b-2 border-blue-600 text-sm">Đăng Nhập</button>
+                <button onclick="switchAuthTab('register')" id="tabRegisterBtn" class="flex-1 pb-3 font-semibold text-slate-400 text-sm">Đăng Ký</button>
+            </div>
+            <div id="loginFormContainer" class="space-y-4">
+                <input type="text" id="loginUsername" placeholder="Tên đăng nhập" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold text-sm">Đăng Nhập</button>
+            </div>
+            <div id="registerFormContainer" class="space-y-4 hidden">
+                <input type="text" id="regName" placeholder="Họ tên" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <input type="text" id="regUsername" placeholder="Tên đăng nhập" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <input type="password" id="regPassword" placeholder="Mật khẩu" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <button onclick="handleRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm">Đăng Ký</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nạp tiền -->
+    <div id="topUpModal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-center border border-slate-800">
+            <button onclick="closeTopUpModal()" class="absolute top-4 right-4 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold">Nạp tiền qua Techcombank</h3>
+            <div id="topupStep1" class="space-y-3">
+                <input type="number" id="topAmount" placeholder="Nhập số tiền (tối thiểu 10.000đ)" class="w-full bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm">
+                <button onclick="genQR()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold text-sm">Tạo mã QR</button>
+            </div>
+            <div id="topupStep2" class="hidden space-y-3">
+                <img id="qrImg" src="" class="w-48 h-48 mx-auto border rounded-xl">
+                <p class="text-xs text-slate-400">Nội dung chuyển khoản bắt buộc:</p>
+                <p id="qrMemo" class="text-lg font-extrabold text-red-500"></p>
+                <button onclick="submitTopup()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-semibold">Tôi đã chuyển khoản</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            user: JSON.parse(localStorage.getItem('utbkr_current_user')) || null,
+            accounts: JSON.parse(localStorage.getItem('utbkr_accounts')) || [],
+            products: JSON.parse(localStorage.getItem('utbkr_products')) || [],
+            topup: JSON.parse(localStorage.getItem('utbkr_topup')) || [],
+            orders: JSON.parse(localStorage.getItem('utbkr_orders')) || []
+        };
+
+        // Chế độ sáng tối
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('utbkr_theme', 'light');
+                icon.className = "fa-solid fa-sun";
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('utbkr_theme', 'dark');
+                icon.className = "fa-solid fa-moon";
+            }
+        }
+        if (localStorage.getItem('utbkr_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.getElementById('themeIcon').className = "fa-solid fa-sun";
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        window.addEventListener('storage', function() {
+            db.products = JSON.parse(localStorage.getItem('utbkr_products')) || [];
+            db.orders = JSON.parse(localStorage.getItem('utbkr_orders')) || [];
+            let freshUser = JSON.parse(localStorage.getItem('utbkr_current_user'));
+            if(freshUser && db.user && freshUser.id === db.user.id) {
+                db.user.balance = freshUser.balance;
+            }
+            renderProducts();
+            updateUI();
+        });
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            if (db.products.length === 0) {
+                grid.innerHTML = `<p class="text-slate-400 col-span-full text-center py-8">Chưa có sản phẩm nào được Admin đăng bán.</p>`;
+                return;
+            }
+            db.products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+                        <img src="${p.image}" class="w-full h-48 object-cover">
+                        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">${p.name}</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">${p.desc}</p>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="font-extrabold text-blue-600">${p.price.toLocaleString()}đ</span>
+                                <span class="text-xs text-slate-500">Kho: ${p.stock}</span>
+                            </div>
+                            <button onclick="buy('${p.id}')" class="w-full bg-blue-600 text-white py-2 rounded-xl text-xs font-semibold hover:bg-blue-700">Mua ngay</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('loginFormContainer').classList.remove('hidden');
+                document.getElementById('registerFormContainer').classList.add('hidden');
+            } else {
+                document.getElementById('registerFormContainer').classList.remove('hidden');
+                document.getElementById('loginFormContainer').classList.add('hidden');
+            }
+        }
+
+        function handleRegister() {
+            let name = document.getElementById('regName').value.trim();
+            let username = document.getElementById('regUsername').value.trim();
+            let password = document.getElementById('regPassword').value.trim();
+            if (!name || !username || !password) { Swal.fire('Lỗi', 'Điền đủ thông tin!', 'error'); return; }
+            db.accounts.push({ id: 'U_' + Date.now(), name, username, password, balance: 0 });
+            localStorage.setItem('utbkr_accounts', JSON.stringify(db.accounts));
+            Swal.fire('Thành công', 'Đăng ký thành công!', 'success');
+            switchAuthTab('login');
+        }
+
+        function handleLogin() {
+            let u = document.getElementById('loginUsername').value.trim();
+            let p = document.getElementById('loginPassword').value.trim();
+            let found = db.accounts.find(x => x.username === u && x.password === p);
+            if (!found) { Swal.fire('Lỗi', 'Sai tài khoản hoặc mật khẩu!', 'error'); return; }
+            db.user = found;
+            localStorage.setItem('utbkr_current_user', JSON.stringify(db.user));
+            closeAuthModal();
+            updateUI();
+            Swal.fire({ icon: 'success', title: 'Xin chào ' + found.name, timer: 1000, showConfirmButton: false });
+        }
+
+        function logout() {
+            db.user = null;
+            localStorage.removeItem('utbkr_current_user');
+            updateUI();
+            Swal.fire('Đã đăng xuất', '', 'info');
+        }
+
+        function updateUI() {
+            if (db.user) {
+                document.getElementById('authArea').classList.add('hidden');
+                document.getElementById('loggedInArea').classList.remove('hidden');
+                let freshUser = JSON.parse(localStorage.getItem('utbkr_current_user')) || db.user;
+                let balStr = freshUser.balance.toLocaleString();
+                document.getElementById('clientBalance').innerText = balStr + 'đ';
+                document.getElementById('sidebarBalance').innerText = balStr;
+            } else {
+                document.getElementById('authArea').classList.remove('hidden');
+                document.getElementById('loggedInArea').classList.add('hidden');
+                document.getElementById('sidebarBalance').innerText = '0';
+            }
+        }
+
+        function openMyOrdersModal() {
+            if (!db.user) { Swal.fire('Lỗi', 'Vui lòng đăng nhập!', 'warning'); openAuthModal(); return; }
+            db.orders = JSON.parse(localStorage.getItem('utbkr_orders')) || [];
+            let myOrders = db.orders.filter(x => x.userId === db.user.id);
+            let list = document.getElementById('myOrdersList');
+            list.innerHTML = '';
+            if (myOrders.length === 0) {
+                list.innerHTML = `<p class="text-slate-400 text-center py-6">Chưa có đơn hàng nào.</p>`;
+            } else {
+                myOrders.forEach(o => {
+                    let dContent = o.status === 'completed' ? `
+                        <div class="mt-2 border-t pt-2 text-xs">
+                            ${o.deliveryText ? `<div class="bg-slate-100 dark:bg-slate-800 p-2 rounded font-mono select-all"><b>Tài khoản/Nội dung:</b><br>${o.deliveryText}</div>` : ''}
+                            ${o.deliveryFile ? `<a href="${o.deliveryFile}" target="_blank" class="mt-2 inline-block bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold"><i class="fa-solid fa-download mr-1"></i>Tải file đính kèm</a>` : ''}
+                        </div>
+                    ` : `<p class="text-xs text-amber-500 mt-2">Đang chờ Admin gửi nội dung/file...</p>`;
+                    list.innerHTML += `
+                        <div class="border dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-800/50">
+                            <div class="flex justify-between font-bold text-sm">
+                                <span class="text-blue-500">${o.productName}</span>
+                                <span class="text-xs text-slate-400">${o.time}</span>
+                            </div>
+                            <p class="text-xs mt-1">Giá: <b>${o.price.toLocaleString()}đ</b></p>
+                            ${dContent}
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('myOrdersModal').classList.remove('hidden');
+        }
+        function closeMyOrdersModal() { document.getElementById('myOrdersModal').classList.add('hidden'); }
+        function showInfoModal(title, desc) { Swal.fire(title, desc, 'info'); }
+
+        let tempAmount = 0, tempMemo = '';
+        function openTopUpModal() {
+            if (!db.user) { Swal.fire('Lỗi', 'Vui lòng đăng nhập!', 'warning'); openAuthModal(); return; }
+            document.getElementById('topupStep1').classList.remove('hidden');
+            document.getElementById('topupStep2').classList.add('hidden');
+            document.getElementById('topUpModal').classList.remove('hidden');
+        }
+        function closeTopUpModal() { document.getElementById('topUpModal').classList.add('hidden'); }
+        function genQR() {
+            tempAmount = parseInt(document.getElementById('topAmount').value);
+            if (!tempAmount || tempAmount < 10000) { Swal.fire('Lỗi', 'Tối thiểu 10.000đ', 'error'); return; }
+            tempMemo = 'NAP' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('qrImg').src = `https://img.vietqr.io/image/TCB-2126042009-compact2.png?amount=${tempAmount}&addInfo=${tempMemo}&accountName=Y%20UT%20BKRONG`;
+            document.getElementById('qrMemo').innerText = tempMemo;
+            document.getElementById('topupStep1').classList.add('hidden');
+            document.getElementById('topupStep2').classList.remove('hidden');
+        }
+        function submitTopup() {
+            db.topup.push({ id: 'TP_' + Date.now(), userId: db.user.id, userName: db.user.name, amount: tempAmount, memo: tempMemo, time: new Date().toLocaleString(), status: 'pending' });
+            localStorage.setItem('utbkr_topup', JSON.stringify(db.topup));
+            closeTopUpModal();
+            Swal.fire('Thành công', 'Đã gửi yêu cầu nạp tiền!', 'success');
+        }
+
+        function buy(id) {
+            if (!db.user) { Swal.fire('Lỗi', 'Vui lòng đăng nhập!', 'warning'); openAuthModal(); return; }
+            let p = db.products.find(x => x.id === id);
+            let freshUser = JSON.parse(localStorage.getItem('utbkr_current_user'));
+            if (freshUser.balance < p.price) { Swal.fire('Lỗi', 'Số dư không đủ!', 'error'); openTopUpModal(); return; }
+            
+            freshUser.balance -= p.price;
+            p.stock -= 1;
+            db.user = freshUser;
+            db.orders.push({
+                id: 'ORD_' + Date.now(), userId: freshUser.id, userName: freshUser.name,
+                productId: p.id, productName: p.name, price: p.price, time: new Date().toLocaleString(),
+                status: 'pending', deliveryText: '', deliveryFile: ''
+            });
+
+            localStorage.setItem('utbkr_current_user', JSON.stringify(freshUser));
+            localStorage.setItem('utbkr_accounts', JSON.stringify(db.accounts.map(acc => acc.id === freshUser.id ? freshUser : acc)));
+            localStorage.setItem('utbkr_products', JSON.stringify(db.products));
+            localStorage.setItem('utbkr_orders', JSON.stringify(db.orders));
+
+            updateUI();
+            renderProducts();
+            Swal.fire({ icon: 'success', title: 'Mua thành công!', text: 'Vào mục Lịch sử để xem nội dung/file khi Admin gửi.' });
+        }
+
+        window.onload = () => { renderProducts(); updateUI(); };
+    </script>
+</body>
+</html>
